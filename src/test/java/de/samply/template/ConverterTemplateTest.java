@@ -54,11 +54,15 @@ class ConverterTemplateTest {
 
   private AttributeTemplate generateAttributeTemplate(int i, int j) {
     String extension = i + "." + j;
-    return new AttributeTemplate(j, "col-" + extension, "col-" + extension,
+    AttributeTemplate attributeTemplate = new AttributeTemplate(j, "col-" + extension,
+        "col-" + extension,
         "path.to.attribute." + extension);
+    attributeTemplate.setParentFhirPath("path.to.parent.container-" + i);
+    attributeTemplate.setMdr("urn:test:dataelement:" + i + ":" + j);
+    return attributeTemplate;
   }
 
-  private List<String> generateFhirRevIncludes(){
+  private List<String> generateFhirRevIncludes() {
     List<String> fhirRevIncludes = new ArrayList<>();
     fhirRevIncludes.add("Observation:patient");
     fhirRevIncludes.add("Condition:patient");
