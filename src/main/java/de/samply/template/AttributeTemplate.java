@@ -1,5 +1,6 @@
 package de.samply.template;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import de.samply.teiler.TeilerConst;
@@ -19,17 +20,17 @@ public class AttributeTemplate {
   @JsonProperty("fhir-path")
   private String fhirPath;
 
-  @JacksonXmlProperty(isAttribute = true, localName = "parent-fhir-path")
-  @JsonProperty("parent-fhir-path")
-  private String parentFhirPath;
+  @JacksonXmlProperty(isAttribute = true, localName = "join-fhir-path")
+  @JsonProperty("join-fhir-path")
+  private String joinFhirPath;
 
-  @JacksonXmlProperty(isAttribute = true, localName = "child-fhir-path")
-  @JsonProperty("child-fhir-path")
-  private String childFhirPath;
+  @JacksonXmlProperty(isAttribute = true, localName = "condition-value-fhir-path")
+  @JsonProperty("condition-value-fhir-path")
+  private String conditionValueFhirPath;
 
-  @JacksonXmlProperty(isAttribute = true, localName = "condition-fhir-path")
-  @JsonProperty("condition-fhir-path")
-  private String conditionFhirPath;
+  @JacksonXmlProperty(isAttribute = true, localName = "condition-id-fhir-path")
+  @JsonProperty("condition-id-fhir-path")
+  private String conditionIdFhirPath;
 
   @JacksonXmlProperty(isAttribute = true, localName = "anonym")
   @JsonProperty("anonym")
@@ -77,32 +78,6 @@ public class AttributeTemplate {
     this.fhirPath = fhirPath;
   }
 
-  public String getParentFhirPath() {
-    return parentFhirPath;
-  }
-
-  public List<String> fetchParentFhirPaths() {
-    return (parentFhirPath == null) ? new ArrayList<>() :
-        Arrays.asList(parentFhirPath.trim().split(TeilerConst.RELATED_FHIR_PATH_DELIMITER));
-  }
-
-  public String getChildFhirPath() {
-    return childFhirPath;
-  }
-
-  public List<String> fetchChildFhirPaths() {
-    return (childFhirPath == null) ? new ArrayList<>() :
-        Arrays.asList(childFhirPath.trim().split(TeilerConst.RELATED_FHIR_PATH_DELIMITER));
-  }
-
-  public void setChildFhirPath(String childFhirPath) {
-    this.childFhirPath = childFhirPath;
-  }
-
-  public void setParentFhirPath(String parentFhirPath) {
-    this.parentFhirPath = parentFhirPath;
-  }
-
   public String getMdr() {
     return mdr;
   }
@@ -124,7 +99,7 @@ public class AttributeTemplate {
   }
 
   public void setOperation(String operation) {
-    if (operation != null){
+    if (operation != null) {
       this.operation = Operation.valueOf(operation);
     }
   }
@@ -133,12 +108,93 @@ public class AttributeTemplate {
     this.operation = operation;
   }
 
-  public String getConditionFhirPath() {
-    return conditionFhirPath;
+  public String getConditionValueFhirPath() {
+    return conditionValueFhirPath;
   }
 
-  public void setConditionFhirPath(String conditionFhirPath) {
-    this.conditionFhirPath = conditionFhirPath;
+  public void setConditionValueFhirPath(String conditionValueFhirPath) {
+    this.conditionValueFhirPath = conditionValueFhirPath;
+  }
+
+  public String getJoinFhirPath() {
+    return joinFhirPath;
+  }
+
+  public void setJoinFhirPath(String joinFhirPath) {
+    this.joinFhirPath = joinFhirPath;
+  }
+
+  public List<String> fetchJoinFhirPaths() {
+    return (joinFhirPath == null) ? new ArrayList<>() :
+        Arrays.asList(joinFhirPath.trim().split(TeilerConst.RELATED_FHIR_PATH_DELIMITER));
+  }
+
+  @JsonIgnore
+  private Boolean isDirectJoinFhirPath;
+
+  @JsonIgnore
+  public boolean isDirectJoinFhirPath() {
+    if (joinFhirPath == null) {
+      return false;
+    }
+    if (isDirectJoinFhirPath == null) {
+      isDirectJoinFhirPath = true;
+      Boolean isParentFhirPath = null;
+      for (String joinFhirPath : fetchJoinFhirPaths()) {
+        boolean isChildFhirPath = isChildFhirPath(joinFhirPath);
+        if (isParentFhirPath == null) {
+          isParentFhirPath = !isChildFhirPath;
+        } else {
+          if (isParentFhirPath && isChildFhirPath) {
+            isDirectJoinFhirPath = false;
+            break;
+          }
+        }
+      }
+    }
+    return isDirectJoinFhirPath;
+  }
+
+  @JsonIgnore
+  private Boolean isChildFhirPath = null;
+
+  @JsonIgnore
+  public boolean isDirectParentFhirPath() {
+    if (joinFhirPath == null) {
+      return false;
+    }
+    if (isChildFhirPath == null) {
+      isChildFhirPath = isChildFhirPath(joinFhirPath);
+    }
+    return !isChildFhirPath && isDirectJoinFhirPath();
+  }
+
+  @JsonIgnore
+  public boolean isDirectChildFhirPath() {
+    if (joinFhirPath == null) {
+      return false;
+    }
+    if (isChildFhirPath == null) {
+      isChildFhirPath = isChildFhirPath(joinFhirPath);
+    }
+    return isChildFhirPath && isDirectJoinFhirPath();
+  }
+
+  public static boolean isChildFhirPath(String joinFhirPath) {
+    return joinFhirPath.startsWith(TeilerConst.CHILD_FHIR_PATH_HEAD);
+  }
+
+  public static String removeChildFhirPathHead(String joinFhirPath) {
+    return (joinFhirPath.startsWith(TeilerConst.CHILD_FHIR_PATH_HEAD)) ? joinFhirPath.substring(1)
+        : joinFhirPath;
+  }
+
+  public String getConditionIdFhirPath() {
+    return conditionIdFhirPath;
+  }
+
+  public void setConditionIdFhirPath(String conditionIdFhirPath) {
+    this.conditionIdFhirPath = conditionIdFhirPath;
   }
 
 }

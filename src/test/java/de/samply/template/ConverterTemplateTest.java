@@ -56,17 +56,21 @@ class ConverterTemplateTest {
     AttributeTemplate attributeTemplate = new AttributeTemplate("col-" + extension,
         "col-" + extension,
         "path.to.attribute." + extension);
-    attributeTemplate.setParentFhirPath("path.to.parent.container-" + i);
-    attributeTemplate.setChildFhirPath("path.to.child.container-" + i);
     attributeTemplate.setMdr("urn:test:dataelement:" + i + ":" + j);
-    if (random.nextInt(2) == 0){
+    if (random.nextInt(2) == 0) {
       attributeTemplate.setAnonym(attributeTemplate.getCsvColumnName());
     }
-    if (random.nextInt(2) == 0){
+    if (random.nextInt(2) == 0) {
       attributeTemplate.setOperation(Operation.EXTRACT_RELATIVE_ID.name());
     }
-    if (random.nextInt(2) == 0){
-      attributeTemplate.setConditionFhirPath("condition.path"+i);
+    if (random.nextInt(2) == 0) {
+      attributeTemplate.setConditionValueFhirPath("value.condition.path" + i);
+    }
+    if (random.nextInt(2) == 0) {
+      attributeTemplate.setConditionIdFhirPath("id.condition.path" + i);
+    }
+    if (random.nextInt(2) == 0) {
+      attributeTemplate.setJoinFhirPath("path.to.other.resource");
     }
 
     return attributeTemplate;
